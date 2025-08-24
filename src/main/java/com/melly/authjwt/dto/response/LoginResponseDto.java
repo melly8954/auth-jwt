@@ -9,7 +9,8 @@ import lombok.*;
 @Builder
 public class LoginResponseDto {
     private String username;
-    private String token;
+    private String accessToken;
+    private String refreshToken;
     private String role;
     private String message;
     private boolean success;
