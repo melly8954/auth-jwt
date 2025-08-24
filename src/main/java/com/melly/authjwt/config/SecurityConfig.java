@@ -66,7 +66,7 @@ public class SecurityConfig {
                             String registrationId = token.getAuthorizedClientRegistrationId();
                             PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
 
-                            OAuth2LoginResponseDto dto = oAuth2Service.loginWithOAuth(principalDetails, request, registrationId);
+                            OAuth2LoginResponseDto dto = oAuth2Service.loginWithOAuth(principalDetails, request, response, registrationId);
 
                             response.setContentType("application/json");
                             response.setCharacterEncoding("UTF-8");

@@ -3,13 +3,16 @@ package com.melly.authjwt.service;
 import com.melly.authjwt.common.auth.PrincipalDetails;
 import com.melly.authjwt.common.enums.ErrorType;
 import com.melly.authjwt.common.exception.CustomException;
+import com.melly.authjwt.common.util.CookieUtil;
 import com.melly.authjwt.domain.entity.UserAuthProviderEntity;
 import com.melly.authjwt.domain.entity.UserEntity;
 import com.melly.authjwt.domain.repository.UserAuthProviderRepository;
 import com.melly.authjwt.dto.response.OAuth2LoginResponseDto;
 import com.melly.authjwt.dto.response.RefreshTokenDto;
 import com.melly.authjwt.jwt.JwtUtil;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -27,7 +30,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
-    public OAuth2LoginResponseDto loginWithOAuth(PrincipalDetails principal, HttpServletRequest request, String registrationId) {
+    public OAuth2LoginResponseDto loginWithOAuth(PrincipalDetails principal, HttpServletRequest request, HttpServletResponse response, String registrationId) {
         UserEntity user = principal.getUserEntity();
         UserAuthProviderEntity authProvider = userAuthProviderRepository
                 .findByUserIdAndProviderFetchJoin(user.getUserId(), registrationId)
@@ -40,6 +43,10 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         String tokenId = UUID.randomUUID().toString();
         RefreshTokenDto refreshTokenDto = new RefreshTokenDto(tokenId, user.getUserId(), LocalDateTime.now(), LocalDateTime.now().plus(Duration.ofMillis(86400000L)));
         redisTemplate.opsForValue().set("refresh:" + user.getUserId() + ":" + tokenId, refreshTokenDto, Duration.ofDays(1));
+
+        // 쿠키 생성
+        Cookie refreshCookie = CookieUtil.createCookie("RefreshToken", refreshToken);
+        response.addCookie(refreshCookie);
 
         return OAuth2LoginResponseDto.builder()
                 .username(user.getUsername())

@@ -3,12 +3,15 @@ package com.melly.authjwt.service;
 import com.melly.authjwt.common.auth.PrincipalDetails;
 import com.melly.authjwt.common.enums.ErrorType;
 import com.melly.authjwt.common.exception.CustomException;
+import com.melly.authjwt.common.util.CookieUtil;
 import com.melly.authjwt.domain.entity.UserEntity;
 import com.melly.authjwt.dto.request.LoginRequestDto;
 import com.melly.authjwt.dto.response.LoginResponseDto;
 import com.melly.authjwt.dto.response.RefreshTokenDto;
 import com.melly.authjwt.jwt.JwtUtil;
 import io.lettuce.core.RedisCommandTimeoutException;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.RedisConnectionFailureException;
 import org.springframework.data.redis.RedisSystemException;
@@ -34,7 +37,7 @@ public class AuthServiceImpl implements AuthService {
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Override
-    public LoginResponseDto login(LoginRequestDto dto) {
+    public LoginResponseDto login(LoginRequestDto dto, HttpServletResponse response) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(dto.getUsername(), dto.getPassword())
@@ -47,6 +50,10 @@ public class AuthServiceImpl implements AuthService {
             String tokenId = UUID.randomUUID().toString();
             RefreshTokenDto refreshTokenDto = new RefreshTokenDto(tokenId, user.getUserId(), LocalDateTime.now(), LocalDateTime.now().plus(Duration.ofMillis(86400000L)));
             redisTemplate.opsForValue().set("refresh:" + user.getUserId() + ":" + tokenId, refreshTokenDto, Duration.ofDays(1));
+
+            // 쿠키 생성
+            Cookie refreshCookie = CookieUtil.createCookie("RefreshToken", refreshToken);
+            response.addCookie(refreshCookie);
 
             return LoginResponseDto.builder()
                     .username(user.getUsername())
