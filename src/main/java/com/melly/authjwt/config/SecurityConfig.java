@@ -1,11 +1,13 @@
 package com.melly.authjwt.config;
 
-import com.melly.authjwt.common.auth.CustomAccessDeniedHandler;
-import com.melly.authjwt.common.auth.CustomAuthenticationEntryPoint;
-import com.melly.authjwt.common.auth.CustomAuthenticationProvider;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.melly.authjwt.common.auth.*;
 import com.melly.authjwt.domain.repository.UserRepository;
+import com.melly.authjwt.dto.response.LoginResponseDto;
+import com.melly.authjwt.dto.response.OAuth2LoginResponseDto;
 import com.melly.authjwt.jwt.JwtFilter;
 import com.melly.authjwt.jwt.JwtUtil;
+import com.melly.authjwt.service.OAuth2Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +19,7 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -29,6 +32,8 @@ public class SecurityConfig {
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final JwtUtil jwtUtil;
+    private final PrincipalOAuth2UserService principalOAuth2UserService;
+    private final OAuth2Service oAuth2Service;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -53,7 +58,21 @@ public class SecurityConfig {
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 // JwtFilter 를 UsernamePasswordAuthenticationFilter 앞에 추가
-                .addFilterBefore(new JwtFilter(jwtUtil,userRepository), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtFilter(jwtUtil,userRepository), UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo.userService(principalOAuth2UserService))
+                        .successHandler((request, response, authentication) -> {
+                            OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
+                            String registrationId = token.getAuthorizedClientRegistrationId();
+                            PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+
+                            OAuth2LoginResponseDto dto = oAuth2Service.loginWithOAuth(principalDetails, request, registrationId);
+
+                            response.setContentType("application/json");
+                            response.setCharacterEncoding("UTF-8");
+                            response.getWriter().write(new ObjectMapper().writeValueAsString(dto));
+                        })
+                );
         return http.build();
     }
 

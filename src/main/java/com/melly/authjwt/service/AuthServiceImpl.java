@@ -46,7 +46,7 @@ public class AuthServiceImpl implements AuthService {
 
             String tokenId = UUID.randomUUID().toString();
             RefreshTokenDto refreshTokenDto = new RefreshTokenDto(tokenId, user.getUserId(), LocalDateTime.now(), LocalDateTime.now().plus(Duration.ofMillis(86400000L)));
-            redisTemplate.opsForValue().set("refresh:" + user.getUserId() + ":" + tokenId, refreshTokenDto, Duration.ofDays(7));
+            redisTemplate.opsForValue().set("refresh:" + user.getUserId() + ":" + tokenId, refreshTokenDto, Duration.ofDays(1));
 
             return LoginResponseDto.builder()
                     .username(user.getUsername())
