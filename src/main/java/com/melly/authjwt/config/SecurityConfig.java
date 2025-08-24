@@ -1,7 +1,11 @@
 package com.melly.authjwt.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.melly.authjwt.common.auth.CustomAccessDeniedHandler;
+import com.melly.authjwt.common.auth.CustomAuthenticationEntryPoint;
+import com.melly.authjwt.common.auth.CustomAuthenticationProvider;
 import com.melly.authjwt.domain.repository.UserRepository;
+import com.melly.authjwt.jwt.JwtFilter;
+import com.melly.authjwt.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,8 +17,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -22,6 +26,9 @@ import org.springframework.security.web.SecurityFilterChain;
 public class SecurityConfig {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
+    private final JwtUtil jwtUtil;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -40,7 +47,23 @@ public class SecurityConfig {
                                 "/api/v1/admins/**")
                         .hasRole("ADMIN")
                         .anyRequest().authenticated()
-                );
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                )
+                // JwtFilter 를 UsernamePasswordAuthenticationFilter 앞에 추가
+                .addFilterBefore(new JwtFilter(jwtUtil,userRepository), UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
+    public AuthenticationProvider customAuthenticationProvider() {
+        return new CustomAuthenticationProvider(userRepository, passwordEncoder);
     }
 }
