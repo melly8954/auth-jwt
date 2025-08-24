@@ -1,6 +1,8 @@
 spring:
   application:
     name: auth-jwt
+  config:
+    import: optional:file:.env[.properties]
   jpa:
     hibernate:
       ddl-auto: none
@@ -15,6 +17,8 @@ spring:
     url: jdbc:p6spy:mysql://localhost:3306/auth_jwt?characterEncoding=UTF-8&serverTimezone=Asia/Seoul
     username: psw_auth
     password: auth1234!
+  jwt:
+    secret: ${JWT_SECRET_KEY}
 
 logging:
   level:
