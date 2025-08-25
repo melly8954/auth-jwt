@@ -30,6 +30,10 @@ public class JwtUtil {
         return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("role", String.class);
     }
 
+    public String getTokenId(String token) {
+        return Jwts.parser().verifyWith(secretKey).build().parseSignedClaims(token).getPayload().get("tokenId", String.class);
+    }
+
     public Boolean isExpired(String token) {
         try {
             // parseSignedClaims 시 이미 만료 검사 포함
@@ -41,11 +45,12 @@ public class JwtUtil {
     }
 
     // Jwt 생성
-    public String createJwt(String category, String username, String role, Long expiredMs){
+    public String createJwt(String category, String username, String role, String tokenId,Long expiredMs){
         return Jwts.builder()
                 .claim("category",category)
                 .claim("username",username)
                 .claim("role",role)
+                .claim("tokenId", tokenId)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiredMs))
                 .signWith(secretKey)

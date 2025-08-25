@@ -25,6 +25,17 @@ public enum ErrorType {
     USER_NOT_FOUND("user_not_found", "해당 정보로 등록된 사용자가 없습니다.", HttpStatus.NOT_FOUND),
     USER_DELETED("user_deleted", "탈퇴된 계정입니다.", HttpStatus.UNAUTHORIZED),
 
+    // JWT / Token
+    ACCESS_TOKEN_NOT_FOUND("access_token_not_found", "Access Token 이 요청에 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
+    INVALID_ACCESS_TOKEN("invalid_access_token", "유효하지 않은 Access Token 입니다.", HttpStatus.UNAUTHORIZED),
+    EXPIRED_ACCESS_TOKEN("expired_access_token", "만료된 Access Token 입니다.", HttpStatus.UNAUTHORIZED),
+
+    REFRESH_TOKEN_NOT_FOUND("refresh_token_not_found", "Refresh Token 이 요청에 존재하지 않습니다.", HttpStatus.BAD_REQUEST),
+    INVALID_REFRESH_TOKEN("invalid_refresh_token", "유효하지 않은 Refresh Token 입니다.", HttpStatus.UNAUTHORIZED),
+    EXPIRED_REFRESH_TOKEN("expired_refresh_token", "만료된 Refresh Token 입니다.", HttpStatus.UNAUTHORIZED),
+
+    REFRESH_TOKEN_NOT_FOUND_IN_REDIS("refresh_token_not_found_in_redis", "Refresh Token 이 Redis에 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+
     // Redis 관련 에러
     REDIS_CONNECTION_ERROR("redis_connection_error","Redis 연결 실패", HttpStatus.INTERNAL_SERVER_ERROR),   // 연결 실패
     REDIS_COMMAND_ERROR("redis_command_error","Redis 명령 실행 실패", HttpStatus.INTERNAL_SERVER_ERROR); // 명령/접속 문제

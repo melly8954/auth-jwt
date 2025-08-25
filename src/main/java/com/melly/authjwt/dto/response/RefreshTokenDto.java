@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @Builder
 public class RefreshTokenDto {
     private String tokenId;
-    private Long userId;
-
+    private String getUsername;
+    private String role;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime issuedAt;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

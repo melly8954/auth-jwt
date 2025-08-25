@@ -4,7 +4,9 @@ import com.melly.authjwt.common.controller.ResponseController;
 import com.melly.authjwt.common.dto.ResponseDto;
 import com.melly.authjwt.dto.request.LoginRequestDto;
 import com.melly.authjwt.dto.response.LoginResponseDto;
+import com.melly.authjwt.dto.response.ReIssueTokenDto;
 import com.melly.authjwt.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -26,4 +28,9 @@ public class AuthController implements ResponseController {
         return makeResponseEntity(HttpStatus.OK, null, responseDto.getMessage(), responseDto);
     }
 
+    @PostMapping("/reissue")
+    public ResponseEntity<ResponseDto<ReIssueTokenDto>> reissueToken(HttpServletRequest request, HttpServletResponse response){
+        ReIssueTokenDto responseDto = authService.reissueToken(request, response);
+        return makeResponseEntity(HttpStatus.OK, "null","토큰 재발급 성공", responseDto);
+    }
 }

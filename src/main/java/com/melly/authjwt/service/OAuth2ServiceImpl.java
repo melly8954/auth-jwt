@@ -37,12 +37,14 @@ public class OAuth2ServiceImpl implements OAuth2Service {
                 .orElseThrow(() -> new CustomException(ErrorType.USER_NOT_FOUND));
 
         // JWT 발급
-        String accessToken = jwtUtil.createJwt("AccessToken", user.getUsername(), user.getRole().name(), 600000L);
-        String refreshToken = jwtUtil.createJwt("RefreshToken", user.getUsername(), user.getRole().name(), 86400000L);
-
         String tokenId = UUID.randomUUID().toString();
-        RefreshTokenDto refreshTokenDto = new RefreshTokenDto(tokenId, user.getUserId(), LocalDateTime.now(), LocalDateTime.now().plus(Duration.ofMillis(86400000L)));
-        redisTemplate.opsForValue().set("refresh:" + user.getUserId() + ":" + tokenId, refreshTokenDto, Duration.ofDays(1));
+
+        String accessToken = jwtUtil.createJwt("AccessToken", user.getUsername(), user.getRole().name(), tokenId, 600000L);
+        String refreshToken = jwtUtil.createJwt("RefreshToken", user.getUsername(), user.getRole().name(), tokenId, 86400000L);
+
+
+        RefreshTokenDto refreshTokenDto = new RefreshTokenDto(tokenId, user.getUsername(), user.getRole().name(), LocalDateTime.now(), LocalDateTime.now().plus(Duration.ofMillis(86400000L)));
+        redisTemplate.opsForValue().set("refresh:" + user.getUsername() + ":" + tokenId, refreshTokenDto, Duration.ofDays(1));
 
         // 쿠키 생성
         Cookie refreshCookie = CookieUtil.createCookie("RefreshToken", refreshToken);

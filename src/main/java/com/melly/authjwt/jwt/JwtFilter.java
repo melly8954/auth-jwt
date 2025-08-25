@@ -50,7 +50,12 @@ public class JwtFilter extends OncePerRequestFilter {
         if (jwtUtil.isExpired(accessToken)) {
             log.error("Expired JWT token");
 
-            sendErrorResponse(response, 401, ErrorType.UNAUTHORIZED.getErrorCode(), "Expired JWT token");
+            sendErrorResponse(
+                    response,
+                    ErrorType.EXPIRED_ACCESS_TOKEN.getStatus().value(),
+                    ErrorType.EXPIRED_ACCESS_TOKEN.getErrorCode(),
+                    ErrorType.EXPIRED_ACCESS_TOKEN.getMessage()
+            );
             return;
         }
 
@@ -60,7 +65,12 @@ public class JwtFilter extends OncePerRequestFilter {
         if (!category.equals("AccessToken")) {
             log.error("Invalid JWT token");
 
-            sendErrorResponse(response, 401, ErrorType.UNAUTHORIZED.getErrorCode(), "Invalid JWT token");
+            sendErrorResponse(
+                    response,
+                    ErrorType.INVALID_ACCESS_TOKEN.getStatus().value(),
+                    ErrorType.INVALID_ACCESS_TOKEN.getErrorCode(),
+                    ErrorType.INVALID_ACCESS_TOKEN.getMessage()
+            );
             return;
         }
 
@@ -78,6 +88,7 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    // Spring Security Filter 내부에서는 일반적으로 @ControllerAdvice 기반 전역 예외처리(@ExceptionHandler)가 동작하지 않기에 JSON Response 처리
     private void sendErrorResponse(HttpServletResponse response, int status, String errorCode, String message) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

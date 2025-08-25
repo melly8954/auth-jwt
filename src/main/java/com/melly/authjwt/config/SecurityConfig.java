@@ -3,7 +3,6 @@ package com.melly.authjwt.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.melly.authjwt.common.auth.*;
 import com.melly.authjwt.domain.repository.UserRepository;
-import com.melly.authjwt.dto.response.LoginResponseDto;
 import com.melly.authjwt.dto.response.OAuth2LoginResponseDto;
 import com.melly.authjwt.jwt.JwtFilter;
 import com.melly.authjwt.jwt.JwtUtil;
@@ -46,7 +45,8 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/v1/users",
                                 "/api/v1/auth/login",
-                                "/api/v1/auth/logout")
+                                "/api/v1/auth/logout",
+                                "/api/v1/auth/reissue")
                         .permitAll()
                         .requestMatchers(
                                 "/api/v1/admins/**")

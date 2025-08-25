@@ -16,12 +16,12 @@ public class CookieUtil {
 
 
     // 쿠키 조회
-    public static String getValue(HttpServletRequest request, String name) {
+    public static String getValue(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         String refreshToken = null;
         if (cookies != null) {
             for (Cookie cookie : cookies) {
-                if ("refreshToken".equals(cookie.getName())) {
+                if ("RefreshToken".equals(cookie.getName())) {
                     refreshToken = cookie.getValue();
                 }
             }
