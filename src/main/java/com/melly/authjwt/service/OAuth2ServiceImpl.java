@@ -44,7 +44,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
 
 
         RefreshTokenDto refreshTokenDto = new RefreshTokenDto(tokenId, user.getUsername(), user.getRole().name(), LocalDateTime.now(), LocalDateTime.now().plus(Duration.ofMillis(86400000L)));
-        redisTemplate.opsForValue().set("refresh:" + user.getUsername() + ":" + tokenId, refreshTokenDto, Duration.ofDays(1));
+        redisTemplate.opsForValue().set("RefreshToken:" + user.getUsername() + ":" + tokenId, refreshTokenDto, Duration.ofDays(1));
 
         // 쿠키 생성
         Cookie refreshCookie = CookieUtil.createCookie("RefreshToken", refreshToken);

@@ -12,6 +12,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -28,10 +29,12 @@ public class JwtFilter extends OncePerRequestFilter {
     // JWT 검증 로직은 인증이 필요한 요청이 들어올 때마다 확실히 한 번만 실행되도록 보장
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
-    public JwtFilter(JwtUtil jwtUtil, UserRepository userRepository) {
+    public JwtFilter(JwtUtil jwtUtil, UserRepository userRepository, RedisTemplate<String, Object> redisTemplate) {
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
+        this.redisTemplate = redisTemplate;
     }
 
     @Override
@@ -70,6 +73,20 @@ public class JwtFilter extends OncePerRequestFilter {
                     ErrorType.INVALID_ACCESS_TOKEN.getStatus().value(),
                     ErrorType.INVALID_ACCESS_TOKEN.getErrorCode(),
                     ErrorType.INVALID_ACCESS_TOKEN.getMessage()
+            );
+            return;
+        }
+
+        // 블랙리스트 체크
+        Boolean isBlacklisted = redisTemplate.hasKey("BLACKLIST_" + accessToken);
+        if (Boolean.TRUE.equals(isBlacklisted)) {
+            log.error("Blacklisted JWT token");
+
+            sendErrorResponse(
+                    response,
+                    ErrorType.TOKEN_BLACKLISTED.getStatus().value(),
+                    ErrorType.TOKEN_BLACKLISTED.getErrorCode(),
+                    ErrorType.TOKEN_BLACKLISTED.getMessage()
             );
             return;
         }

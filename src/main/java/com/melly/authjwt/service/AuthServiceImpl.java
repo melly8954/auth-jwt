@@ -30,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -55,7 +56,7 @@ public class AuthServiceImpl implements AuthService {
 
 
             RefreshTokenDto refreshTokenDto = new RefreshTokenDto(tokenId, user.getUsername(), user.getRole().name(), LocalDateTime.now(), LocalDateTime.now().plus(Duration.ofMillis(86400000L)));
-            redisTemplate.opsForValue().set("refresh:" + user.getUsername() + ":" + tokenId, refreshTokenDto, Duration.ofDays(1));
+            redisTemplate.opsForValue().set("RefreshToken:" + user.getUsername() + ":" + tokenId, refreshTokenDto, Duration.ofDays(1));
 
             // 쿠키 생성
             Cookie refreshCookie = CookieUtil.createCookie("RefreshToken", refreshToken);
@@ -106,7 +107,7 @@ public class AuthServiceImpl implements AuthService {
         String username = jwtUtil.getUsername(refreshToken);
         String tokenId = jwtUtil.getTokenId(refreshToken);
 
-        String key = "refresh:" + username + ":" + tokenId;
+        String key = "RefreshToken:" + username + ":" + tokenId;
         Object redisValue = redisTemplate.opsForValue().get(key);
 
         if (redisValue == null) {
@@ -129,7 +130,7 @@ public class AuthServiceImpl implements AuthService {
                 LocalDateTime.now(),
                 LocalDateTime.now().plus(Duration.ofMillis(86400000L))
         );
-        redisTemplate.opsForValue().set("refresh:" + username + ":" + newTokenId, newRefreshTokenDto, Duration.ofDays(1));
+        redisTemplate.opsForValue().set("RefreshToken:" + username + ":" + newTokenId, newRefreshTokenDto, Duration.ofDays(1));
 
         // 기존 refresh token 삭제
         redisTemplate.delete(key);
@@ -139,5 +140,41 @@ public class AuthServiceImpl implements AuthService {
         response.addCookie(refreshCookie);
 
         return new ReIssueTokenDto(newAccessToken, newRefreshToken);
+    }
+
+    @Override
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        String accessToken = request.getHeader("Authorization");
+        if (accessToken != null && accessToken.startsWith("Bearer ")) {
+            accessToken = accessToken.substring(7); // "Bearer " 제거
+        }
+
+        // 토큰에서 남은 만료 시간 계산
+        long expiration = jwtUtil.getExpiration(accessToken);
+
+        // Redis 블랙리스트에 저장 (TTL 설정)
+        if (expiration > 0) {
+            redisTemplate.opsForValue().set(
+                    "BLACKLIST_" + accessToken,
+                    "logout",
+                    expiration,
+                    TimeUnit.MILLISECONDS
+            );
+        }
+
+        String refreshToken = CookieUtil.getValue(request);
+        String username = jwtUtil.getUsername(refreshToken);
+        String tokenId = jwtUtil.getTokenId(refreshToken);
+
+        String key = "RefreshToken:" + username + ":" + tokenId;
+
+        redisTemplate.delete(key);
+
+        // 쿠키에서 refresh token 제거
+        Cookie refreshCookie = new Cookie("RefreshToken", null);
+        refreshCookie.setHttpOnly(true);
+        refreshCookie.setPath("/");
+        refreshCookie.setMaxAge(0); // 바로 만료
+        response.addCookie(refreshCookie);
     }
 }

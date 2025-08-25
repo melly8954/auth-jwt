@@ -33,4 +33,10 @@ public class AuthController implements ResponseController {
         ReIssueTokenDto responseDto = authService.reissueToken(request, response);
         return makeResponseEntity(HttpStatus.OK, "null","토큰 재발급 성공", responseDto);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseDto<Void>> logout(HttpServletRequest request, HttpServletResponse response){
+        authService.logout(request,response);
+        return makeResponseEntity(HttpStatus.OK, "null","로그아웃 성공", null);
+    }
 }

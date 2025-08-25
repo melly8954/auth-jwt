@@ -35,6 +35,7 @@ public enum ErrorType {
     EXPIRED_REFRESH_TOKEN("expired_refresh_token", "만료된 Refresh Token 입니다.", HttpStatus.UNAUTHORIZED),
 
     REFRESH_TOKEN_NOT_FOUND_IN_REDIS("refresh_token_not_found_in_redis", "Refresh Token 이 Redis에 존재하지 않습니다.", HttpStatus.NOT_FOUND),
+    TOKEN_BLACKLISTED("token_blacklisted","해당 토큰은 BlackList 토큰입니다.", HttpStatus.BAD_REQUEST),
 
     // Redis 관련 에러
     REDIS_CONNECTION_ERROR("redis_connection_error","Redis 연결 실패", HttpStatus.INTERNAL_SERVER_ERROR),   // 연결 실패

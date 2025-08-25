@@ -10,6 +10,7 @@ import com.melly.authjwt.service.OAuth2Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -33,6 +34,7 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final PrincipalOAuth2UserService principalOAuth2UserService;
     private final OAuth2Service oAuth2Service;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -58,7 +60,7 @@ public class SecurityConfig {
                         .accessDeniedHandler(customAccessDeniedHandler)
                 )
                 // JwtFilter 를 UsernamePasswordAuthenticationFilter 앞에 추가
-                .addFilterBefore(new JwtFilter(jwtUtil,userRepository), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtFilter(jwtUtil,userRepository,redisTemplate), UsernamePasswordAuthenticationFilter.class)
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(principalOAuth2UserService))
                         .successHandler((request, response, authentication) -> {
