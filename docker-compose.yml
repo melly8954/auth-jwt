@@ -1,0 +1,19 @@
+version: "3.9"
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: auth-jwt-db
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${DB_NAME}                  # DB 이름
+      MYSQL_USER: ${DB_USER}                      # 일반 사용자
+      MYSQL_PASSWORD: ${DB_PASSWORD}              # 일반 사용자 비밀번호
+    ports:
+      - "${MYSQL_HOST_PORT}:3306"   # 컨테이너 내부 포트 3306
+    volumes:
+      - ./mysql-init/:/docker-entrypoint-initdb.d/
+  redis:
+    image: redis:7.0
+    container_name: auth-jwt-redis
+    ports:
+      - "${REDIS_HOST_PORT}:6379"  # 컨테이너 내부 포트 6379
