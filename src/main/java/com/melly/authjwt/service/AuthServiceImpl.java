@@ -40,7 +40,8 @@ public class AuthServiceImpl implements AuthService {
     private final AuthenticationManager authenticationManager;
     private final RedisTemplate<String, Object> redisTemplate;
     private final ObjectMapper objectMapper;
-    
+    private final CookieUtil cookieUtil;
+
     @Override
     public LoginResponseDto login(LoginRequestDto dto, HttpServletResponse response) {
         try {
@@ -59,7 +60,7 @@ public class AuthServiceImpl implements AuthService {
             redisTemplate.opsForValue().set("RefreshToken:" + user.getUsername() + ":" + tokenId, refreshTokenDto, Duration.ofDays(1));
 
             // 쿠키 생성
-            Cookie refreshCookie = CookieUtil.createCookie("RefreshToken", refreshToken);
+            Cookie refreshCookie = cookieUtil.createCookie("RefreshToken", refreshToken);
             response.addCookie(refreshCookie);
 
             return LoginResponseDto.builder()
@@ -89,7 +90,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ReIssueTokenDto reissueToken(HttpServletRequest request, HttpServletResponse response) {
         // 쿠키에서 refresh 토큰 추출
-        String refreshToken = CookieUtil.getValue(request);
+        String refreshToken = cookieUtil.getValue(request);
         if (refreshToken == null) {
             throw new CustomException(ErrorType.REFRESH_TOKEN_NOT_FOUND);
         }
@@ -136,7 +137,7 @@ public class AuthServiceImpl implements AuthService {
         redisTemplate.delete(key);
 
         // 쿠키에 새로운 refreshToken 저장
-        Cookie refreshCookie = CookieUtil.createCookie("RefreshToken", newRefreshToken);
+        Cookie refreshCookie = cookieUtil.createCookie("RefreshToken", newRefreshToken);
         response.addCookie(refreshCookie);
 
         return new ReIssueTokenDto(newAccessToken, newRefreshToken);
@@ -162,7 +163,7 @@ public class AuthServiceImpl implements AuthService {
             );
         }
 
-        String refreshToken = CookieUtil.getValue(request);
+        String refreshToken = cookieUtil.getValue(request);
         String username = jwtUtil.getUsername(refreshToken);
         String tokenId = jwtUtil.getTokenId(refreshToken);
 

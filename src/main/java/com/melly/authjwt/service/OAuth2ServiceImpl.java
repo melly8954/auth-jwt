@@ -28,6 +28,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
     private final UserAuthProviderRepository userAuthProviderRepository;
     private final JwtUtil jwtUtil;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final CookieUtil cookieUtil;
 
     @Override
     public OAuth2LoginResponseDto loginWithOAuth(PrincipalDetails principal, HttpServletRequest request, HttpServletResponse response, String registrationId) {
@@ -47,7 +48,7 @@ public class OAuth2ServiceImpl implements OAuth2Service {
         redisTemplate.opsForValue().set("RefreshToken:" + user.getUsername() + ":" + tokenId, refreshTokenDto, Duration.ofDays(1));
 
         // 쿠키 생성
-        Cookie refreshCookie = CookieUtil.createCookie("RefreshToken", refreshToken);
+        Cookie refreshCookie = cookieUtil.createCookie("RefreshToken", refreshToken);
         response.addCookie(refreshCookie);
 
         return OAuth2LoginResponseDto.builder()

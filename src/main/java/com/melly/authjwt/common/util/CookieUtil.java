@@ -2,10 +2,12 @@ package com.melly.authjwt.common.util;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.stereotype.Component;
 
+@Component
 public class CookieUtil {
     // 쿠키 생성 메서드
-    public static Cookie createCookie(String key, String value) {
+    public Cookie createCookie(String key, String value) {
         Cookie cookie = new Cookie(key, value);
         cookie.setMaxAge(24*60*60);
         cookie.setPath("/");        // 쿠키가 사이트의 모든 경로에서 유효하도록 설정
@@ -16,7 +18,7 @@ public class CookieUtil {
 
 
     // 쿠키 조회
-    public static String getValue(HttpServletRequest request) {
+    public String getValue(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         String refreshToken = null;
         if (cookies != null) {
