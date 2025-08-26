@@ -89,3 +89,12 @@ CREATE TABLE `user_auth_provider_tbl` (
   CONSTRAINT `user_auth_provider_tbl_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_tbl` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
+
+| 메서드  | 엔드포인트                      | 설명                      |
+| ---- | -------------------------- | ----------------------- |
+| POST | /api/v1/users        | 회원가입                    |
+| POST | /api/v1/auth/login         | 로그인 (JWT 발급)            |
+| POST | /api/v1/auth/logout        | 로그아웃 (Refresh Token 삭제) |
+| POST | /api/v1/auth/reissue | 토큰 갱신                   |
+| GET  | /api/v1/users/test            | 인증된 사용자 정보 조회           |
+| GET  | /api/v1/admins/test | 관리자 권한을 가진 인증된 사용자 정보 조회 |
