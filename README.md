@@ -3,7 +3,7 @@
 Spring Security 기반 **JWT 인증** 학습/실습 프로젝트입니다.  
 Access/Refresh Token 발급, Redis에 Refresh Token 저장, 토큰 재발급(로테이션), 로그아웃 구현을 직접 구현/분석했습니다.  
 
-자세한 인증 흐름 및 코드 해설은 [Notion 문서](https://www.notion.so/Auth-Jwt-25bd351413c0806e9a18e34bfd02c911) 에 정리되어 있습니다.
+자세한 인증 흐름 및 코드 해설은 [Notion 문서](https://northern-mongoose-47b.notion.site/Auth-Jwt-25bd351413c0806e9a18e34bfd02c911) 에 정리되어 있습니다.
 
 ---
 
