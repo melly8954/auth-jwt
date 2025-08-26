@@ -30,7 +30,7 @@ Access/Refresh Token 발급, Redis에 Refresh Token 저장, 토큰 재발급(로
   - JWT 발급
     - Access Token (짧은 유효기간)
     - Refresh Token (상대적으로 긴 유효기간)
-  - Redis에 Refresh Token 저장
+  - Redis에 Refresh Token 저장 (키: `RefreshToken:{username}:{tokenId}`)
   - 클라이언트 쿠키에 Refresh Token 저장 (HttpOnly 옵션)
   - 인증 요청 시 JWT를 통한 검증 (JwtFilter)
 - 인증 토큰 재발급 (Access Token 만료 시)
@@ -39,7 +39,7 @@ Access/Refresh Token 발급, Redis에 Refresh Token 저장, 토큰 재발급(로
   - 기존 Refresh Token 삭제 후 신규 Refresh Token Redis에 저장
   - 클라이언트 쿠키에 신규 Refresh Token 저장
 - 로그아웃
-  - Access Token 블랙리스트 등록
+  - Redis에 Access Token 블랙리스트 등록 (키 : `BLACKLIST_<Access Token>`)
   - Refresh Token 무효화
   - 클라이언트 쿠키에서 Refresh Token 제거 
 - OAuth2 로그인: Google 소셜 계정 연동 (환경변수로 클라이언트 ID/Secret 관리)
@@ -89,8 +89,10 @@ CREATE TABLE `user_auth_provider_tbl` (
   CONSTRAINT `user_auth_provider_tbl_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_tbl` (`user_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 ```
+<hr>
 
-| 메서드  | 엔드포인트                      | 설명                      |
+#### API 명세
+| Method  | Endpoint                      | 설명                      |
 | ---- | -------------------------- | ----------------------- |
 | POST | /api/v1/users        | 회원가입                    |
 | POST | /api/v1/auth/login         | 로그인 (JWT 발급)            |
