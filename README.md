@@ -77,6 +77,7 @@ REDIS_HOST_PORT=6380
 
 **2️⃣ Gradle 빌드**
 ```bash
+# Windows(CMD) -> gradlew.bat build
 ./gradlew build
 ```
 
