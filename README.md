@@ -52,7 +52,28 @@ Access/Refresh Token 발급, Redis에 Refresh Token 저장, 토큰 재발급(로
 
 **1️⃣ 환경 변수 설정**
 프로젝트 루트에 `.env` 파일 생성 후, 필요한 환경 변수를 설정합니다.
-[.env 파일 템플릿]()
+```bash
+# Google OAuth2 설정
+GOOGLE_CLIENT_ID=your_google_client_id
+GOOGLE_CLIENT_SECRET=your_google_client_secret
+
+# JWT 시크릿 키
+JWT_SECRET_KEY=your_jwt_secret_key
+
+# MySQL 설정
+MYSQL_ROOT_PASSWORD=your_mysql_root_password
+DB_NAME=your_database_name
+DB_USER=your_database_user
+DB_PASSWORD=your_database_password
+
+# 로컬 개발용 포트
+MYSQL_LOCAL_PORT=3306
+REDIS_LOCAL_PORT=6379
+
+# 도커 환경용 포트
+MYSQL_HOST_PORT=3307
+REDIS_HOST_PORT=6380
+```
 
 **2️⃣ Gradle 빌드**
 ```bash
