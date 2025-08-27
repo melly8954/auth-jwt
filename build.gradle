@@ -49,6 +49,10 @@ dependencies {
 
     // jackson 라이브러리
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    // test H2 인메모리 DB
+    runtimeOnly 'com.h2database:h2'
+    testImplementation 'com.h2database:h2'
 }
 
 tasks.named('test') {
