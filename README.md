@@ -48,46 +48,32 @@ Access/Refresh Token 발급, Redis에 Refresh Token 저장, 토큰 재발급(로
   - 회원가입, 로그인, 로그아웃, 토큰 갱신, 소셜 로그인<br><br>
 ---
 
+## 🚀 프로젝트 실행 방법
 
-**데이터베이스 초기 설정**
-```sql
-create database auth_jwt character set utf8mb4 collate utf8mb4_general_ci;
-create user `psw_auth`@`%` identified by 'auth1234!';
-grant all privileges on auth_jwt.* to `psw_auth`@`%` with grant option;
-flush privileges;
+**1️⃣ 환경 변수 설정**
+프로젝트 루트에 `.env` 파일 생성 후, 필요한 환경 변수를 설정합니다.
+[.env 파일 템플릿]()
+
+**2️⃣ Gradle 빌드**
+```bash
+./gradlew build
 ```
 
-
-#### 사용자 테이블
-```sql
-CREATE TABLE `user_tbl` (
-  `user_id` bigint NOT NULL AUTO_INCREMENT,
-  `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `email` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
-  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'USER',
-  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ACTIVE',
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` datetime DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`user_id`),
-  UNIQUE KEY `username` (`username`),
-  UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+**3️⃣ DB 및 Redis 실행 (Docker Compose)**
+```bash
+docker-compose up -d
 ```
 
-#### 인증 제공자 테이블 (소셜 로그인용)
-```sql
-CREATE TABLE `user_auth_provider_tbl` (
-  `auth_provider_id` bigint NOT NULL AUTO_INCREMENT,
-  `user_id` bigint NOT NULL,
-  `provider` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `provider_id` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci NOT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`auth_provider_id`),
-  UNIQUE KEY `uk_provider_user` (`provider`,`provider_id`),
-  KEY `user_id` (`user_id`),
-  CONSTRAINT `user_auth_provider_tbl_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_tbl` (`user_id`) ON DELETE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+MySQL과 Redis가 백그라운드에서 실행됩니다.
+
+**4️⃣ Docker 이미지 빌드**
+```bash
+docker build -t auth-jwt:latest .
+```
+
+**5️⃣ 애플리케이션 실행**
+```bash
+docker run -p 8080:8080 --network auth-jwt_default --env-file .env -e "SPRING_PROFILES_ACTIVE=docker" --name auth-jwt-app auth-jwt:latest
 ```
 <hr>
 
