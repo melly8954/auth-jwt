@@ -12,6 +12,7 @@ Access/Refresh Token 발급, Redis에 Refresh Token 저장, 토큰 재발급(로
 - Spring Boot 3.4.9
 - Spring Security
 - Spring Data JPA
+- JJWT (io.jsonwebtoken) – JWT 발급/검증
 - MySQL 8.4
 - Redis
 - Gradle
