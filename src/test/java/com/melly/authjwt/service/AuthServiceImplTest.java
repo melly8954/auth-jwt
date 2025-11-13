@@ -158,38 +158,38 @@ public class AuthServiceImplTest {
     @Nested
     @DisplayName("reissueToken() 메서드 테스트")
     class reissueToken {
-        @Test
-        @DisplayName("성공 - 토큰 재발급")
-        void testReissueTokenSuccess() {
-            String oldToken = "oldRefreshToken";
-            String username = "user1";
-            String tokenId = "tokenId1";
-            RefreshTokenDto oldDto = new RefreshTokenDto(tokenId, username, "ROLE_USER", LocalDateTime.now(), LocalDateTime.now().plusDays(1));
+            @Test
+            @DisplayName("성공 - 토큰 재발급")
+            void testReissueTokenSuccess() {
+                String oldToken = "oldRefreshToken";
+                String username = "user1";
+                String tokenId = "tokenId1";
+                RefreshTokenDto oldDto = new RefreshTokenDto(tokenId, username, "ROLE_USER", LocalDateTime.now(), LocalDateTime.now().plusDays(1));
 
-            when(cookieUtil.getValue(request)).thenReturn(oldToken);
-            when(jwtUtil.isExpired(oldToken)).thenReturn(false);
-            when(jwtUtil.getCategory(oldToken)).thenReturn("RefreshToken");
-            when(jwtUtil.getUsername(oldToken)).thenReturn(username);
-            when(jwtUtil.getTokenId(oldToken)).thenReturn(tokenId);
+                when(cookieUtil.getValue(request)).thenReturn(oldToken);
+                when(jwtUtil.isExpired(oldToken)).thenReturn(false);
+                when(jwtUtil.getCategory(oldToken)).thenReturn("RefreshToken");
+                when(jwtUtil.getUsername(oldToken)).thenReturn(username);
+                when(jwtUtil.getTokenId(oldToken)).thenReturn(tokenId);
 
-            when(redisTemplate.opsForValue()).thenReturn(valueOperations);
-            when(valueOperations.get(anyString())).thenReturn(oldDto);
-            when(objectMapper.convertValue(any(), eq(RefreshTokenDto.class))).thenReturn(oldDto);
-            doNothing().when(valueOperations).set(anyString(), any(), any(Duration.class));
+                when(redisTemplate.opsForValue()).thenReturn(valueOperations);
+                when(valueOperations.get(anyString())).thenReturn(oldDto);
+                when(objectMapper.convertValue(any(), eq(RefreshTokenDto.class))).thenReturn(oldDto);
+                doNothing().when(valueOperations).set(anyString(), any(), any(Duration.class));
 
-            when(jwtUtil.createJwt(eq("AccessToken"), eq(username), any(), any(), anyLong())).thenReturn("newAccessToken");
-            when(jwtUtil.createJwt(eq("RefreshToken"), eq(username), any(), any(), anyLong())).thenReturn("newRefreshToken");
+                when(jwtUtil.createJwt(eq("AccessToken"), eq(username), any(), any(), anyLong())).thenReturn("newAccessToken");
+                when(jwtUtil.createJwt(eq("RefreshToken"), eq(username), any(), any(), anyLong())).thenReturn("newRefreshToken");
 
-            when(cookieUtil.getValue(request)).thenReturn("oldRefreshToken");
-            when(cookieUtil.createCookie("RefreshToken", "newRefreshToken"))
-                    .thenReturn(new Cookie("RefreshToken", "newRefreshToken"));
+                when(cookieUtil.getValue(request)).thenReturn("oldRefreshToken");
+                when(cookieUtil.createCookie("RefreshToken", "newRefreshToken"))
+                        .thenReturn(new Cookie("RefreshToken", "newRefreshToken"));
 
-            ReIssueTokenDto result = authServiceImpl.reissueToken(request, response);
+                ReIssueTokenDto result = authServiceImpl.reissueToken(request, response);
 
-            assertThat(result).isNotNull();
-            assertThat(result.getNewAccessToken()).isEqualTo("newAccessToken");
-            assertThat(result.getNewRefreshToken()).isEqualTo("newRefreshToken");
-        }
+                assertThat(result).isNotNull();
+                assertThat(result.getNewAccessToken()).isEqualTo("newAccessToken");
+                assertThat(result.getNewRefreshToken()).isEqualTo("newRefreshToken");
+            }
 
         @Test
         @DisplayName("예외 - 존재하지 않는 Refresh Token")
