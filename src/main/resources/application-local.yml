@@ -8,4 +8,4 @@ spring:
     redis:
       host: localhost
       port: ${REDIS_LOCAL_PORT}
-      database: 1
+      database: 0
